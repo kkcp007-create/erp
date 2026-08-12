@@ -4577,13 +4577,15 @@ async function confirmMonthClose() {
   const monthLabel = vnNow().getFullYear() + '.' + String(vnNow().getMonth()+1).padStart(2,'0');
 
   // ✅ 일반 재고: 현재고 → 전월재고 복사 (로컬)
-  const allArrs = [DB.tp, DB.btp, DB.kr, DB.vn, DB.vtth];
+  // ✅ code만으로는 TP/BTP처럼 같은 코드를 공유하는 품목을 구분할 수 없으므로,
+  //    어느 배열에서 왔는지로 cat을 명시적으로 함께 보낸다 (서버 byCodeAndCat과 짝을 맞춤)
+  const allArrs = [[DB.tp,'TP'], [DB.btp,'BTP'], [DB.kr,'KR'], [DB.vn,'VN'], [DB.vtth,'VTTH']];
   let updatedItems = [];
-  allArrs.forEach(arr => {
+  allArrs.forEach(([arr, cat]) => {
     arr.forEach(item => {
       if(item.active === false) return; // 비활성 품목 제외
       item.prev = +item.cur || 0;
-      updatedItems.push({code:item.code, prev:item.prev});
+      updatedItems.push({code:item.code, cat:item.cat||cat, prev:item.prev});
     });
   });
 
